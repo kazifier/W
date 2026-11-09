@@ -3,21 +3,25 @@ import { computeScenario, computeGeometry, computeNdt, makeScenario } from '../s
 
 const s1 = makeScenario({
   tag: 'T1', materialId: 'x65', processId: 'gmaw_spray', positionId: '5G', sizeIndex: 0,
+  component: 'pipe', connectionId: 'pipe_pipe', nps: 24, schedule: '40',
   jointKind: 'singleV', thickness: 12.7, includedAngle: 60, rootGap: 2, land: 1.5,
   reinforcement: 2, rootPenetration: 1.5, lengthMode: 'circ', od: 610, joints: 40,
 });
 const s2 = makeScenario({
   tag: 'T2', materialId: 'a516_70', processId: 'saw', positionId: '1G', sizeIndex: 1,
+  component: 'plate', connectionId: 'plate_flat',
   jointKind: 'doubleV', thickness: 25, includedAngle: 60, rootGap: 2, land: 2,
   reinforcement: 2, rootPenetration: 0, lengthMode: 'fixed', od: 0, lengthPerJoint: 6, joints: 4,
 });
 const s3 = makeScenario({
   tag: 'T3', materialId: 'a36', processId: 'fcaw_gs', positionId: '1G', sizeIndex: 1,
+  component: 'plate', connectionId: 'plate_struct',
   jointKind: 'filletT2', leg: 10, convexity: 0.5, rootPenetration: 1,
   lengthMode: 'fixed', od: 0, lengthPerJoint: 12, joints: 8,
 });
 const s4 = makeScenario({
   tag: 'T4', materialId: 'ss316l', processId: 'gtaw', positionId: '6G', sizeIndex: 1,
+  component: 'pipe', connectionId: 'pipe_pipe', nps: 8, schedule: 'STD',
   jointKind: 'singleU', thickness: 20, includedAngle: 20, rootGap: 2, land: 0, rootRadius: 6,
   reinforcement: 1, rootPenetration: 0, lengthMode: 'circ', od: 219.1, joints: 10,
 });
@@ -82,16 +86,21 @@ const n1 = computeNdt({ ...s1, ndtPct: { ...s1.ndtPct, rt: 10, vt: 100, pt: 0, m
 allOk = check('T1 RT joints tested (10% of 40)', n1.lines.find((l) => l.method.id === 'rt')!.jointsTested, 4, 0) && allOk;
 
 // large bore -> linear basis
-const big = makeScenario({ lengthMode: 'circ', od: 1219, joints: 10, jointKind: 'doubleV', thickness: 20, materialId: 'x70', processId: 'saw' });
+const big = makeScenario({
+  component: 'pipe', connectionId: 'pipe_pipe', nps: 48, schedule: 'STD',
+  joints: 10, jointKind: 'doubleV', thickness: 20, materialId: 'x70', processId: 'saw',
+});
 const rb = computeScenario(big);
-allOk = check('Large bore (1219 mm) NDT basis linear', rb.ndt.basis === 'linear' ? 1 : 0, 1, 0) && allOk;
+allOk = check('Large bore (1219.2 mm) NDT basis linear', rb.ndt.basis === 'linear' ? 1 : 0, 1, 0) && allOk;
 
 // material density effect: stainless should be heavier than carbon for same area
-const csSame = computeScenario(makeScenario({ materialId: 'a106b', jointKind: 'singleV', thickness: 20, lengthMode: 'fixed', od: 0, lengthPerJoint: 10, joints: 1 }));
-const ssSame = computeScenario(makeScenario({ materialId: 'ss316l', jointKind: 'singleV', thickness: 20, lengthMode: 'fixed', od: 0, lengthPerJoint: 10, joints: 1 }));
+const csSame = computeScenario(makeScenario({ materialId: 'a106b', component: 'plate', connectionId: 'plate_flat', jointKind: 'singleV', thickness: 20, lengthMode: 'fixed', od: 0, lengthPerJoint: 10, joints: 1 }));
+const ssSame = computeScenario(makeScenario({ materialId: 'ss316l', component: 'plate', connectionId: 'plate_flat', jointKind: 'singleV', thickness: 20, lengthMode: 'fixed', od: 0, lengthPerJoint: 10, joints: 1 }));
 allOk = check('316L denser than carbon steel', ssSame.deposit / csSame.deposit, 8000 / 7850, 0.5) && allOk;
 
 // consumable efficiency
-allOk = check('SMAW gross = deposit / 0.65', computeScenario(makeScenario({ processId: 'smaw' })).grossConsumable, computeScenario(makeScenario({ processId: 'smaw' })).deposit / 0.65, 0.01) && allOk;
+const smawScn = makeScenario({ processId: 'smaw', component: 'plate', connectionId: 'plate_flat' });
+allOk = check('SMAW gross = deposit / 0.65', computeScenario(smawScn).grossConsumable, computeScenario(smawScn).deposit / 0.65, 0.01) && allOk;
 
 console.log(`\nRESULT: ${allOk ? 'ALL CHECKS PASSED' : 'SOME CHECKS FAILED'}`);
+if (!allOk) process.exit(1);
