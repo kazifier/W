@@ -1,78 +1,49 @@
-# WeldCalc — Welding Calculation Sheet
+# WeldCalc — welding calculation sheet
 
-A welding engineering calculation sheet for planning weld metal quantities, consumables,
-welding hours and NDT scope across multiple weld scenarios.
+A browser-based welding calculation sheet. It turns a weld scenario (component, connection,
+base metal, joint preparation, process) into weld-metal deposit weight, consumable
+requirement, welder hours and an NDT examination plan.
 
-Live site: https://site-9ed6c568dc2a405cbf021f2dc10de291.freebuff.page
+Live: https://site-9ed6c568dc2a405cbf021f2dc10de291.freebuff.page
 
 ## What it calculates
 
-For every weld scenario (material, joint configuration, thickness, process, position and extent):
-
 | Output | Basis |
 | --- | --- |
-| Weld metal cross-section area | Joint geometry + cap reinforcement + root penetration |
-| Weld metal volume | Area × length |
-| Deposit weight | Volume × material density |
-| Gross consumable | Deposit ÷ deposition efficiency |
-| Wire length / electrode count / SAW flux / shielding gas | Filler form and size |
-| Number of passes | Area ÷ practical bead area |
-| Arc time and welder hours | Deposit ÷ arc rate, then ÷ operating factor |
-| Hours per metre and per joint | Extent normalisation |
-| Heat input and preheat | WPS parameters vs. material limits and carbon equivalent |
-| NDT quantities and inspector hours | Linear-metre or per-joint sampling |
+| Weld cross-section area | Groove geometry (V, double V, bevel, U, J, fillet, corner, square) plus cap reinforcement and root penetration |
+| Deposit weight | Area × length × weld-metal density |
+| Consumable | Deposit ÷ deposition efficiency, then wire length or electrode count, flux and shielding gas |
+| Welder hours | Deposit ÷ deposition rate ÷ operating factor, with position derating |
+| Passes | Area ÷ practical bead area |
+| Thermal checks | Heat input against the material limit; preheat from carbon equivalent |
+| NDT plan | Linear metre for OD ≥ 1000 mm or straight/longitudinal welds; per joint below that |
 
-## Joint configurations
+## Scope of components
 
-Square butt, single V, double V, single bevel, double bevel, single U, double U,
-single J, double J, single-side and double-side T fillet, single/double lap fillet,
-and single-bevel corner — with ISO 9692-1 default angles, gaps, lands and radii.
+- **Pipe** — NPS 1/2" to 48" with schedules 10S, 20, 30, 40, STD, 60, 80, XS, 100, 120, 160 and XXS,
+  or a custom outside diameter. Connections: pipe-to-pipe, to flange, to valve, to equipment
+  shell, to dished end, to fittings and to a branch connection.
+- **Plate** — shell longitudinal seam, shell circumferential seam, shell-to-dished-end, nozzle to
+  shell, flat plate butt and structural T. Seam length can be a fixed figure or π × OD.
+- **Tube** — exchanger tube-to-tubesheet, strength weld and seal weld, from tube outside diameter,
+  wall thickness and tube count.
+- **Dissimilar metal joints** — a second base metal is selected and the filler is picked from the
+  material-group pair. Weld-metal density comes from the filler; preheat is governed by the
+  ferritic side and the heat-input limit is the lower of the two materials.
 
-## NDT scope rule
-
-The sheet applies two sampling bases automatically:
-
-- **Linear metre basis** — outside diameter ≥ 1000 mm, or any straight, longitudinal or
-  structural weld. Quantity tested = sample % × total length; radiographs =
-  ⌈length ÷ 0.30 m effective film⌉.
-- **Per joint basis** — outside diameter < 1000 mm. Joints tested = ⌈% × joint count⌉,
-  so a fraction of a joint is never examined; minimum 3 exposures per joint for small bore.
-
-Methods covered: VT, PT, MT, RT, UT, PAUT and PMI/hardness survey.
-
-## Running locally
+## Run locally
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
-npm run build    # production bundle in dist/
+npm run dev
 ```
 
-## Verification
-
-The calculation engine is checked against independent hand calculations:
+## Checks
 
 ```bash
-npx esbuild scripts/check.ts --bundle --format=esm --platform=node --outfile=/tmp/check.mjs && node /tmp/check.mjs
+npx tsc -b                 # typecheck
+npm run build              # production bundle
+npx esbuild scripts/check.ts --bundle --format=esm --platform=node --outfile=/tmp/check.mjs --log-level=error && node /tmp/check.mjs
+npx esbuild scripts/check-features.ts --bundle --format=esm --platform=node --outfile=/tmp/feat.mjs && node /tmp/feat.mjs
+npx esbuild scripts/ssr-check.tsx --bundle --format=cjs --platform=node --jsx=automatic --outfile=scripts/.ssr.cjs && node scripts/.ssr.cjs
 ```
-
-It asserts groove and fillet cross-section areas, deposit mass, arc-time and welding-hour
-relationships, heat input, NDT basis resolution and NDT joint counts.
-
-## Layout
-
-```
-src/lib/data.ts        Materials, processes, joints, NDT methods, reference constants
-src/lib/calc.ts        Geometry, deposit, consumables, time and NDT engine
-src/App.tsx            Shell, project state, export
-src/components/        Scenarios, Results, NDT plan, Summary sheet, Reference
-scripts/check.ts       Numeric verification harness
-```
-
-## Limitations
-
-Cross-section areas are theoretical geometry; actual site consumption typically runs 5–15 %
-higher because of fit-up variation, repair and rework. Deposition rates and operating factors
-are shop-floor averages. This is a planning calculation, not a substitute for a qualified
-WPS/PQR. Acceptance criteria remain with the applicable code (ASME B31.3 Ch. VI, API 1104
-Cl. 9, ISO 5817).
