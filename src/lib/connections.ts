@@ -22,7 +22,7 @@ export const CONNECTIONS: ConnectionDef[] = [
   // ---------------- pipe ----------------
   {
     id: 'pipe_pipe', component: 'pipe', label: 'Pipe to pipe (butt weld)',
-    detail: 'Girth weld between two pipe lengths or spools. Length = pi x OD.',
+    detail: 'Girth weld between two pipe lengths or spools. Length = π × OD.',
     jointKind: 'singleV', lengthBasis: 'circ', sizeSource: 'nps',
     ndt: { vt: 100, rt: 10, pt: 0, mt: 0, ut: 0, paut: 0, pmi: 0 },
   },
@@ -72,13 +72,13 @@ export const CONNECTIONS: ConnectionDef[] = [
   },
   {
     id: 'plate_circ', component: 'plate', label: 'Shell circumferential seam (course to course)',
-    detail: 'Girth seam joining two shell courses. Length = pi x shell OD.',
+    detail: 'Girth seam joining two shell courses. Length = π × shell OD.',
     jointKind: 'doubleV', lengthBasis: 'circ', sizeSource: 'shellOd',
     ndt: { vt: 100, rt: 10, pt: 0, mt: 0, ut: 20, paut: 0, pmi: 0 },
   },
   {
     id: 'plate_shell_dish', component: 'plate', label: 'Shell to dished end',
-    detail: 'Closing seam between shell and 2:1 ellipsoidal or torispherical head. Length = pi x shell OD.',
+    detail: 'Closing seam between shell and 2:1 ellipsoidal or torispherical head. Length = π × shell OD.',
     jointKind: 'singleV', lengthBasis: 'circ', sizeSource: 'shellOd',
     ndt: { vt: 100, rt: 10, pt: 10, mt: 0, ut: 0, paut: 0, pmi: 0 },
   },
@@ -104,7 +104,7 @@ export const CONNECTIONS: ConnectionDef[] = [
   // ---------------- tube ----------------
   {
     id: 'tube_ts_strength', component: 'tube', label: 'Tube to tubesheet — strength weld',
-    detail: 'Full-strength seal weld around each tube. Length per joint = pi x tube OD.',
+    detail: 'Full-strength seal weld around each tube. Length per joint = π × tube OD.',
     jointKind: 'filletT1', lengthBasis: 'circ', sizeSource: 'tubeOd',
     ndt: { vt: 100, rt: 5, pt: 10, mt: 0, ut: 0, paut: 0, pmi: 0 },
   },
@@ -122,7 +122,7 @@ export const CONNECTIONS: ConnectionDef[] = [
   },
   {
     id: 'tube_tube', component: 'tube', label: 'Tube to tube butt weld',
-    detail: 'Orbital or manual butt weld joining two tubes. Length per joint = pi x tube OD.',
+    detail: 'Orbital or manual butt weld joining two tubes. Length per joint = π × tube OD.',
     jointKind: 'singleV', lengthBasis: 'circ', sizeSource: 'tubeOd',
     ndt: { vt: 100, rt: 10, pt: 0, mt: 0, ut: 0, paut: 0, pmi: 0 },
   },
@@ -146,20 +146,20 @@ export const COMPONENT_LABELS: Record<ComponentType, string> = {
 
 export interface DissimilarFiller {
   filler: string;
-  density: number; // kg/m3 of the deposited weld metal
+  density: number; // kg/m³ of the deposited weld metal
   note: string;
   compatible: boolean;
 }
 
 const RULES: Record<string, DissimilarFiller> = {
   'CS|LAS': { filler: 'E8018-B2 / ER80S-B2', density: 7850, note: 'Match the low-alloy side. PWHT to the Cr-Mo requirement, not the carbon side.', compatible: true },
-  'CS|SS': { filler: 'ER309L / E309L-16', density: 7900, note: 'Over-alloyed austenitic filler absorbs carbon dilution from the ferritic side. No preheat; hold interpass <= 150 C.', compatible: true },
-  'CS|DSS': { filler: 'ER2209', density: 7800, note: 'Duplex filler; control heat input 0.5-1.5 kJ/mm and check ferrite content. Avoid excessive dilution.', compatible: true },
+  'CS|SS': { filler: 'ER309L / E309L-16', density: 7900, note: 'Over-alloyed austenitic filler absorbs carbon dilution from the ferritic side. No preheat; hold interpass ≤ 150 °C.', compatible: true },
+  'CS|DSS': { filler: 'ER2209', density: 7800, note: 'Duplex filler; control heat input 0.5–1.5 kJ/mm and check ferrite content. Avoid excessive dilution.', compatible: true },
   'CS|NI': { filler: 'ERNiCrMo-3', density: 8440, note: 'Nickel-based filler tolerates dilution and differential expansion. Low heat input, stringer beads.', compatible: true },
   'CS|CU': { filler: 'ERCuNi', density: 8940, note: 'Nickel-copper filler for carbon steel to 90/10 or 70/30 CuNi.', compatible: true },
   'CS|AL': { filler: 'Transition joint required', density: 2700, note: 'Aluminium cannot be fusion welded directly to steel — use an explosively bonded transition joint.', compatible: false },
   'CS|TI': { filler: 'Not weldable directly', density: 4510, note: 'Titanium forms brittle intermetallics with steel. Use a transition piece or mechanical joint.', compatible: false },
-  'LAS|SS': { filler: 'ER309L (or ERNiCr-3 if PWHT required)', density: 7900, note: '309L is not suitable above ~600 C PWHT; use nickel-based filler where stress relief is required.', compatible: true },
+  'LAS|SS': { filler: 'ER309L (or ERNiCr-3 if PWHT required)', density: 7900, note: '309L is not suitable above ~600 °C PWHT; use nickel-based filler where stress relief is required.', compatible: true },
   'LAS|DSS': { filler: 'ER2209', density: 7800, note: 'Duplex filler; PWHT of the Cr-Mo side must be completed before the duplex weld.', compatible: true },
   'LAS|NI': { filler: 'ERNiCrMo-3', density: 8440, note: 'Nickel-based filler for Cr-Mo to nickel alloy.', compatible: true },
   'SS|DSS': { filler: 'ER2209', density: 7800, note: 'Duplex filler balances ferrite and austenite across the dilution zone.', compatible: true },
